@@ -5,7 +5,7 @@ A Herdr App layout that draws Herdr as classic ASCII Dwarf Fortress, cloned from
 ## Before changing anything
 
 - Read `~/.config/herdr-app/AGENTS.md` (layouts, mods, keys, settings, limits) and `~/.config/herdr-app/herdr.d.ts` (the mod API). Don't answer Herdr questions from memory.
-- **The live Herdr home is the source; this repo is a snapshot.** Edit in `~/.config/herdr-app/` (hot reload shows changes at once), then run `scripts/sync-from-herdr.sh` here (copies, tests, scans for private strings). Edits to `layouts/`, `themes/` or `mods/` in this repo are overwritten by the next sync. Only `README.md`, `DEVELOPMENT.md`, `AGENTS.md`, `CLAUDE.md`, `scripts/` and `.gitignore` are edited here. Details: `DEVELOPMENT.md`.
+- **The live Herdr home is the source; this repo is a snapshot.** Edit in `~/.config/herdr-app/` (hot reload shows changes at once), then run `scripts/sync-from-herdr.sh` here (copies, tests, scans for private strings). Edits to `layouts/`, `themes/` or `mods/` in this repo are overwritten by the next sync. Only `README.md`, `DEVELOPMENT.md`, `AGENTS.md`, `CLAUDE.md`, `LICENSE`, `scripts/` and `.gitignore` are edited here. Details: `DEVELOPMENT.md`.
 - Never edit Herdr's shipped layouts or mods, the `.d.ts` files, or `~/.config/herdr-app/frame/` and the home's own `AGENTS.md`: Herdr rewrites them on every start.
 
 ## Rules

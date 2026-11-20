@@ -36,6 +36,13 @@ Working on it? See `DEVELOPMENT.md` for how the repo and a live Herdr stay in st
 
 Tests for the pure modules: `cd mods/df-classic && node --test ".tests/*.test.mjs"`.
 
+## License
+
+The code, the layout and theme files and the docs are MIT (`LICENSE`). Two parts carry other terms, and keep them:
+
+- **The font and the tileset** (`mods/df-classic/fonts/`, `tileset/`, `art/PxPlus9x16.png`) are the PxPlus IBM VGA font by VileR, or drawn from it, under CC BY-SA 4.0. See `mods/df-classic/fonts/NOTICE.md`. Reusing the tileset means keeping that credit and license.
+- **Facts from the Dwarf Fortress Wiki** (the workshop grids in `art/wiki_workshop_grids.json`, and the glyph table in `SYMBOLS.md`) come from pages offered under GFDL and MIT; the sources are named in `SYMBOLS.md`.
+
 ## Credits
 
 The tileset is drawn from the PxPlus IBM VGA font (CC BY-SA 4.0), see `mods/df-classic/fonts/NOTICE.md`. Glyph meanings follow Dwarf Fortress as documented by the community; sources are in `mods/df-classic/SYMBOLS.md`. This is a fan layout, not made by or affiliated with Bay 12 Games or Kitfox Games.
