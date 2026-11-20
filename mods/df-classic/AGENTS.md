@@ -134,7 +134,7 @@ the agents sort popup opens `df-classic`).
 
 The live Herdr home is the source of truth; the repo is a snapshot. See
 `DEVELOPMENT.md` in the repo (`scripts/sync-from-herdr.sh` copies, tests and scans for
-private strings). Screenshots must not show real space names, agent titles, emails or
+private strings, and copies `RECIPE.md` and `preview.png` to the repo root, where herdr.dev's gallery reads them). Screenshots must not show real space names, agent titles, emails or
 paths: use generic demo spaces and mask the rest. If a change makes the mod run a new
 program, reach the network or write a new file, update "What it touches" in
 `README.md`.

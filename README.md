@@ -29,6 +29,8 @@ Follow the platform manual's steps (`~/.config/herdr-app/AGENTS.md`, "Layouts an
 ## What is in here
 
 - `RECIPE.md` and `preview.png`: the brief to rebuild it, and its picture (copies of the ones in the mod folder, at the root where herdr.dev's gallery reads them).
+- `LICENSE`: MIT for the code and docs; the font and tileset keep CC BY-SA 4.0 (see "License" below).
+- `AGENTS.md` and `CLAUDE.md` (which only imports `AGENTS.md`): notes for an agent changing it. `DEVELOPMENT.md`: how this repo and a live Herdr stay in step. `scripts/`: `sync-from-herdr.sh` and `install-to-herdr.sh`.
 - `layouts/df-classic.json`: the window.
 - `themes/df-classic.json`: the colors.
 - `mods/df-classic/`: the code, the tileset, the fonts, and the docs: `README.md` (what each file does), `RECIPE.md` (the brief to rebuild it), `SYMBOLS.md` (the game's glyphs and which this layout draws), `AGENTS.md` (rules for changing it).
