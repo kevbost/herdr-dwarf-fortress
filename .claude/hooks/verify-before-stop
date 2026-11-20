@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Stop: when the working tree changed since the last passing run, deploy, then run the
+# tests, herdr-app check, herdr-app status, the privacy scan and the references scan.
+# Exit 2 with the failing output keeps the agent working until they pass.
+set -uo pipefail
+root="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
+home="${HERDR_APP_HOME:-$HOME/.config/herdr-app}"
+input=$(cat)
+# A Stop hook that keeps failing would otherwise block forever.
+[ "$(printf '%s' "$input" | jq -r '.stop_hook_active // false')" = "true" ] && exit 0
+
+cd "$root" || exit 0
+[ -n "$(git status --porcelain 2>/dev/null)" ] || exit 0
+state="$root/.deploy-state"
+mkdir -p "$state"
+# --binary: a changed preview.png must change the fingerprint too
+# the git-ignored word lists feed the scans, so they count too
+fingerprint=$( { git diff HEAD --binary; cat scripts/.private-words scripts/.community-names 2>/dev/null; while IFS= read -r -d '' f; do printf '%s\n' "$f"; cat -- "$f"; done < <(git ls-files -o --exclude-standard -z); } 2>/dev/null | shasum -a 256 | cut -d' ' -f1)
+[ "$(cat "$state/verified" 2>/dev/null)" = "$fingerprint" ] && exit 0
+
+failures=""
+run() { # label, command...
+  local label=$1; shift
+  local out
+  if ! out=$("$@" 2>&1); then failures+=$'\n'"-- $label failed:"$'\n'"$out"$'\n'; fi
+}
+
+have_home=false
+[ -d "$home/layouts" ] && have_home=true
+$have_home && run "deploy" node "$root/scripts/deploy-to-herdr.mjs"
+run "script tests" node --test "scripts/.tests/*.test.mjs"
+run "mod tests" bash -c 'cd mods/df-classic && node --test ".tests/*.test.mjs"'
+if $have_home && command -v herdr-app >/dev/null 2>&1; then
+  run "herdr-app check" env HERDR_APP_HOME="$home" herdr-app check "$home/mods/df-classic"
+  # status always exits 0, so the errors list is what has to be checked (errors from any mod in the home count)
+  run "herdr-app status (errors must be empty)" bash -c 'out=$(herdr-app status) || exit 1; printf "%s" "$out" | jq -e "(.errors // []) | length == 0" >/dev/null || { printf "%s\n" "$out"; exit 1; }'
+fi
+run "privacy scan" "$root/scripts/scan-private.sh"
+run "references scan" "$root/scripts/scan-references.sh"
+
+if [ -n "$failures" ]; then
+  printf 'Verification failed:%s\n' "$failures" >&2
+  exit 2
+fi
+printf '%s' "$fingerprint" >"$state/verified"
+exit 0

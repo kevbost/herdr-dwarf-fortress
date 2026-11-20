@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# PostToolUse: after an edit under layouts/df-classic.*, themes/df-classic.json or
+# mods/df-classic/, or after any Bash command (it may have changed files), copy the
+# repo into the Herdr home and check the mod still loads. Failures go to stderr with
+# exit 2 so the agent sees them. Idle runs print nothing.
+set -uo pipefail
+root="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
+home="${HERDR_APP_HOME:-$HOME/.config/herdr-app}"
+# No Herdr home (a contributor without Herdr): nothing to deploy to.
+[ -d "$home/layouts" ] || exit 0
+input=$(cat)
+tool=$(printf '%s' "$input" | jq -r '.tool_name // empty')
+
+case "$tool" in
+  Edit|Write|MultiEdit)
+    file=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
+    case "$file" in
+      "$root"/layouts/df-classic.*|"$root"/themes/df-classic.json|"$root"/mods/df-classic/*) ;;
+      *) exit 0 ;;
+    esac ;;
+  Bash) ;;
+  *) exit 0 ;;
+esac
+
+"$root/scripts/sync-gallery-copies.sh" >/dev/null 2>&1
+
+out=$(node "$root/scripts/deploy-to-herdr.mjs" 2>&1)
+rc=$?
+# 2 is a conflict: the other files still went out, so the check below still runs.
+if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then
+  printf 'Deploy to the Herdr home failed (exit %s):\n%s\n' "$rc" "$out" >&2
+  exit 2
+fi
+
+problems=""
+if printf '%s\n' "$out" | grep -qE '^(deployed|removed) mods/' && command -v herdr-app >/dev/null 2>&1; then
+  if ! check=$(HERDR_APP_HOME="$home" herdr-app check "$home/mods/df-classic" 2>&1); then
+    problems+=$'Deployed, but herdr-app check failed:\n'"$check"$'\n'
+  fi
+fi
+[ "$rc" -eq 2 ] && problems+=$'Deploy conflict:\n'"$out"$'\n'
+if [ -n "$problems" ]; then
+  printf '%s' "$problems" >&2
+  exit 2
+fi
+exit 0

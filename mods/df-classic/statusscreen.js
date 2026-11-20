@@ -8,7 +8,7 @@
 import { div } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { agents, spaces, terminals, machines, run, props, closeOverlay } from "herdr";
-import { pal, root, agentGlyphs, glyphCell, creatureInk, textButton, GLYPH_W, CH } from "./kit.js";
+import { pal, root, agentGlyphs, glyphCell, creatureInk, speciesChar, textButton, GLYPH_W, CH } from "./kit.js";
 import { tile } from "./tiles.js";
 import { dfDate } from "./calendar.js";
 import { STATE_COLOR } from "./look.js";
@@ -49,7 +49,7 @@ export default class StatusScreen {
     const groups = new Map();
     for (const a of list) {
       const key = a.program?.key ?? a.app ?? "agent";
-      if (!groups.has(key)) groups.set(key, { name: a.program?.name ?? a.app ?? "Agent", first: a, count: 0 });
+      if (!groups.has(key)) groups.set(key, { key, name: a.program?.name ?? a.app ?? "Agent", first: a, count: 0 });
       groups.get(key).count++;
     }
     return h_flex().flex_1().items_start().gap(cells(3)).px(GLYPH_W).pt(CH)
@@ -58,7 +58,7 @@ export default class StatusScreen {
         ? [this.line(c, "None", "DGRAY", "", "DGRAY")]
         : [...groups.values()].map((g) => {
           const glyph = glyphs.get(g.first.address);
-          return this.line(c, g.name, "LGRAY", `${g.count}`, "WHITE", glyph ? glyphCell(glyph.char, creatureInk(c, glyph, { status: "working" }).color) : null);
+          return this.line(c, g.name, "LGRAY", `${g.count}`, "WHITE", glyph ? glyphCell(speciesChar(g.key), creatureInk(c, glyph, { status: "working" }).color) : null);
         })))
       .child(this.column(26, "Ranks:", c, RANKS.map(([status, label]) => {
         const n = list.filter((a) => a.status === status).length;

@@ -1,8 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { AGENT_COLORS, DARK_PARTNER, assignGlyphs, creatureInk, speciesChar, petChar } from "../glyphs.js";
+import { AGENT_COLORS, DARK_PARTNER, FIRST, RACES, assignGlyphs, creatureInk, speciesChar, petChar } from "../glyphs.js";
 
-const claude = (address) => ({ address, key: "claude" });
+const claude = (address) => ({ address, key: "claude", space: address });
+const inSpace = (space, address, key = "claude") => ({ address, key, space });
 const colorsOf = (assigned) => Object.fromEntries([...assigned.glyphs].map(([address, glyph]) => [address, glyph.color]));
 
 test("glyph basics: dwarves and first letters, one address one glyph, no agents no glyphs, cats and dogs", () => {
@@ -126,3 +127,79 @@ test("a creature's ink: idle dark, focused inverted, blocked on red", () => {
   assert.deepEqual(creatureInk(colors, glyph, { status: "blocked", focused: true }), { color: "#000", background: "#f00" });
 });
 
+
+test("races: the first agent in a space is its program's species, each added one cycles elf, goblin, human, kobold", () => {
+  { // five in one space: the species, then every race once, in order
+    const list = ["t1", "t2", "t3", "t4", "t5"].map((address) => inSpace("s1", address));
+    const chars = list.map((agent) => assignGlyphs(list).glyphs.get(agent.address).char);
+    assert.deepEqual(chars, ["☺", "e", "g", "U", "k"]);
+    assert.deepEqual(RACES.map((race) => race.char), ["e", "g", "U", "k"]);
+  }
+  { // past the last race it starts again at the elf, never at the dwarf
+    const list = ["t1", "t2", "t3", "t4", "t5", "t6", "t7"].map((address) => inSpace("s1", address));
+    const assigned = assignGlyphs(list);
+    assert.deepEqual(list.map((agent) => assigned.glyphs.get(agent.address).char), ["☺", "e", "g", "U", "k", "e", "g"]);
+  }
+  { // a space's first agent keeps the program's own character, and each space has its own first
+    const list = [inSpace("s1", "t1", "codex"), inSpace("s1", "t2", "codex"), inSpace("s2", "t3"), inSpace("s2", "t4", "codex")];
+    const assigned = assignGlyphs(list);
+    assert.deepEqual(list.map((agent) => assigned.glyphs.get(agent.address).char), ["C", "e", "☺", "e"]);
+  }
+  { // the lowest address is the first, whatever order they are given in (all new at once)
+    const list = [inSpace("s1", "t10"), inSpace("s1", "t2"), inSpace("s1", "t9")];
+    const forward = assignGlyphs(list).races;
+    assert.deepEqual(forward, assignGlyphs([...list].reverse()).races);
+    assert.deepEqual(forward, { t2: FIRST, t9: "elf", t10: "goblin" });
+  }
+  { // an agent with no space is in the one space that has none
+    const assigned = assignGlyphs([{ address: "t1", key: "claude" }, { address: "t2", key: "claude" }]);
+    assert.equal(assigned.glyphs.get("t1").char, "☺");
+    assert.equal(assigned.glyphs.get("t2").char, "e");
+  }
+});
+
+test("races: remembered for life, the others stay when the first leaves, the next one added cycles", () => {
+  { // arriving one at a time gives the same as arriving together, and nothing changes after
+    let races = {};
+    let live = [];
+    for (const address of ["t1", "t2", "t3"]) {
+      live = [...live, inSpace("s1", address)];
+      races = assignGlyphs(live, {}, races).races;
+    }
+    assert.deepEqual(races, { t1: FIRST, t2: "elf", t3: "goblin" });
+    live = live.filter((agent) => agent.address !== "t1");
+    races = assignGlyphs(live, {}, races).races;
+    assert.deepEqual(races, { t2: "elf", t3: "goblin" }, "the first left: no one else changes, only the living are remembered");
+    live = [...live, inSpace("s1", "t4")];
+    const assigned = assignGlyphs(live, {}, races);
+    assert.equal(assigned.glyphs.get("t4").char, "U", "the next one added cycles on, it is not the first");
+    assert.equal(assigned.glyphs.get("t2").char, "e");
+  }
+  { // a race left free by an agent that went is the next one taken
+    const list = [inSpace("s1", "t1"), inSpace("s1", "t3")];
+    const assigned = assignGlyphs([...list, inSpace("s1", "t4")], {}, { t1: FIRST, t2: "elf", t3: "goblin" });
+    assert.equal(assigned.glyphs.get("t4").char, "e", "t2, the elf, is not here");
+  }
+  { // a space with no agents left starts afresh: the next one is the first again
+    assert.equal(assignGlyphs([inSpace("s1", "t9")], {}, {}).glyphs.get("t9").char, "☺");
+  }
+  { // racesChanged says whether what must be remembered differs; remembered values that are not races are not trusted
+    const first = assignGlyphs([inSpace("s1", "t1"), inSpace("s1", "t2")]);
+    assert.equal(first.racesChanged, true);
+    assert.equal(assignGlyphs([inSpace("s1", "t1"), inSpace("s1", "t2")], first.kept, first.races).racesChanged, false);
+    assert.equal(assignGlyphs([inSpace("s1", "t1")], first.kept, first.races).racesChanged, true, "one left");
+    assert.equal(assignGlyphs([], {}, {}).racesChanged, false);
+    const distrust = assignGlyphs([inSpace("s1", "t1")], {}, { t1: "wizard" });
+    assert.equal(distrust.races.t1, FIRST);
+    assert.equal(assignGlyphs([inSpace("s1", "t1")], {}, null).races.t1, FIRST);
+  }
+  { // a race is a character of its own: its colors are kept apart from the others'
+    const list = ["t1", "t2", "t3", "t4", "t5", "t6"].map((address, index) => inSpace(`s${index}`, address));
+    const assigned = assignGlyphs(list);
+    for (const agent of list) assert.equal(assigned.glyphs.get(agent.address).char, "☺");
+    const elves = ["a1", "a2", "a3"].flatMap((address, index) => [inSpace(`s${index}`, `${address}x`), inSpace(`s${index}`, `${address}y`)]);
+    const withElves = assignGlyphs(elves);
+    const elfColors = elves.filter((agent) => agent.address.endsWith("y")).map((agent) => withElves.glyphs.get(agent.address).color);
+    assert.equal(new Set(elfColors).size, elfColors.length, "three elves, three colors");
+  }
+});

@@ -30,12 +30,12 @@ Follow the platform manual's steps (`~/.config/herdr-app/AGENTS.md`, "Layouts an
 
 - `RECIPE.md` and `preview.png`: the brief to rebuild it, and its picture (copies of the ones in the mod folder, at the root where herdr.dev's gallery reads them).
 - `LICENSE`: MIT for the code and docs; the font and tileset keep CC BY-SA 4.0 (see "License" below).
-- `AGENTS.md` and `CLAUDE.md` (which only imports `AGENTS.md`): notes for an agent changing it. `DEVELOPMENT.md`: how this repo and a live Herdr stay in step. `scripts/`: `sync-from-herdr.sh` and `install-to-herdr.sh`.
+- `AGENTS.md` and `CLAUDE.md` (which imports `AGENTS.md` and Herdr's own manual): notes for an agent changing it. `DEVELOPMENT.md`: how this repo and a live Herdr stay in step. `scripts/`: `deploy-to-herdr.mjs` (repo into the Herdr home), `sync-from-herdr.sh` (pull an app-made change back), `install-to-herdr.sh`, the scans and `sync-gallery-copies.sh`, with their tests. `.claude/`: the hooks that run the deploy and the checks.
 - `layouts/df-classic.json`: the window.
 - `themes/df-classic.json`: the colors.
 - `mods/df-classic/`: the code, the tileset, the fonts, and the docs: `README.md` (what each file does), `RECIPE.md` (the brief to rebuild it), `SYMBOLS.md` (the game's glyphs and which this layout draws), `AGENTS.md` (rules for changing it).
 
-Working on it? See `DEVELOPMENT.md` for how the repo and a live Herdr stay in step (`scripts/sync-from-herdr.sh`, `scripts/install-to-herdr.sh`).
+Working on it? See `DEVELOPMENT.md` for how the repo and a live Herdr stay in step (`scripts/deploy-to-herdr.mjs`, `scripts/sync-from-herdr.sh`, `scripts/install-to-herdr.sh`).
 
 Tests for the pure modules: `cd mods/df-classic && node --test ".tests/*.test.mjs"`.
 

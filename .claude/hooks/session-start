@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# SessionStart: copy the repo into the Herdr home (a git pull, a branch switch or an edit
+# made outside Claude lands here) and say how it went. Its stdout joins the session context.
+set -uo pipefail
+root="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
+home="${HERDR_APP_HOME:-$HOME/.config/herdr-app}"
+if [ ! -d "$home/layouts" ]; then
+  echo "df-classic: no Herdr home found, nothing deployed."
+  exit 0
+fi
+out=$(node "$root/scripts/deploy-to-herdr.mjs" 2>&1)
+rc=$?
+if [ "$rc" -eq 0 ] && [ -z "$out" ]; then
+  echo "df-classic: the repo and the Herdr home are in step."
+elif [ "$rc" -eq 0 ]; then
+  printf 'df-classic: deployed into the Herdr home:\n%s\n' "$out"
+else
+  printf 'df-classic: the deploy into the Herdr home did not finish (exit %s):\n%s\n' "$rc" "$out"
+fi
+exit 0

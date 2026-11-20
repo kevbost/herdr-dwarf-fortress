@@ -1,6 +1,6 @@
 # Dwarf Fortress Classic
 
-Herdr drawn as classic ASCII Dwarf Fortress: a black grid with a one-tile gray frame, the 16 DF colors, and CP437 glyphs for everything that is not text. Agents are creatures walking a small outdoor map; spaces, agents, tabs and pane headers are rows of colored text written as the game writes its menu.
+🧑‍🌾 !important: This is whimsy! It's not perfect, it's not true-to-form df.exe, there are no df keybindings, the dorfs are faked to walk around the screen - but the small details live on, down to the idlers. 🤖 Herdr drawn as classic ASCII Dwarf Fortress: a black grid with a one-tile frame, the 16 DF colors, and CP437 glyphs for every symbol. Each agent is a creature on a small map, and the rest is rows of colored text written like the game's menus. Every Herdr function is preserved.
 
 ![Dwarf Fortress Classic](preview.png)
 
@@ -29,7 +29,7 @@ Left to right, a 9 px left border (`reports`), the shell, a 9 px right border. T
 
 ## How it behaves
 
-- **Agents as creatures.** Claude Code agents are dwarves (`☺`); any other program is its first letter. Each agent keeps one bright color for as long as it lives (`LCYAN`, `YELLOW`, `LMAGENTA`, `WHITE`, `LRED`); two agents of one species do not share one while any is free. Same glyph and color on the map, in the agents list and in the pane header.
+- **Agents as creatures.** The first agent in a space is its program's species (Claude Code agents are dwarves, `☺`; any other program is its first letter); each agent added to that space cycles through elf `e`, goblin `g`, human `U`, kobold `k` (skipping a race the space has while one is free, never back to the dwarf), kept for as long as it lives. Each agent keeps one bright color for as long as it lives (`LCYAN`, `YELLOW`, `LMAGENTA`, `WHITE`, `LRED`); two agents of one character do not share one while any is free. Same glyph and color on the map, in the agents list and in the pane header.
 - **working:** the creature walks, two cells a second (idle ones one), between trees, boulders and the brook (or a workbench or table on the other maps), lingering 1 to 4 steps at each. The spinner `- \ | /` marks it in lists.
 - **idle:** walks to the meeting place and stands, in the dark half of its color; now and then (about one second in fifty) it strolls up to two cells away, looks about for 2 to 5 steps, and walks back.
 - **blocked:** stops on a red cell, blinking with `!`. The announcement line says `<Program> needs you at <space>!` in light red while it is blocked.
@@ -55,7 +55,7 @@ Roles (all `mod: "df-classic"`): `top`, `border`, `reports`, `tabs`, `pane`, `ma
 
 The theme is the iTerm2 "KB Default" palette for terminals only (`ansi` array, black `#000000`, dark gray `#808080`, white `#ffffff`). The menu, map and tiles use the game's own colors from `DF_COLORS` in `kit.js`.
 
-Tiles: a 16 x 16 sheet of CP437 tiles of 9 x 16 px, drawn from the bundled font by `art/render_pxplus.py` and sliced into `tileset/sheet.svg` by `art/slice_tileset.py`, tinted per use. Draw one with `glyphCell(char, color, background)`.
+Tiles: a 16 x 16 sheet of CP437 tiles of 9 x 16 px, drawn from the bundled font by `art/render_pxplus.py` and sliced into `tileset/sheet.svg` by `art/slice_tileset.py`, tinted per use. Tiles 1 and 2 (the smiles) are replaced by hand-drawn 8 x 13 px dwarves (the cell's 9th column stays empty). Draw one with `glyphCell(char, color, background)`.
 
 `herdr` calls: `spaces`, `agents`, `terminals`, `panes`, `machines`, `layout`, `theme`, `shared`/`setShared` (`df.agent.colors`, `df.sidebar.width`, `df.newmenu.mode`, `df.look`, `df.map`), `run` (`pane.focus`, `pane.split`, `tab.new`, `tab.select`, `space.select`, `space.new`, `layout.resize`, `terminal.peek`, `app.settings`, `app.palette`, `mod.open`), `openOverlay`/`closeOverlay`, `notify`, `exec` and `hc` (the spaces role reads each space's git state, as the shipped `spaces` mod does), `watchFolder`, `readTextFile`/`writeTextFile` (to move the menu: it rewrites `layouts/<current>.json`), `nextCommand` (`df-classic.move_menu`), `knownAgents`, `keys`, `window`, `checking`.
 

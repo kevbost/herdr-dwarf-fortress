@@ -15,10 +15,10 @@ import { TILESET } from "./tileset.js";
 import { find, sideOf, swapMenuSide, isRoleHidden as hiddenIn } from "./tree.js";
 
 export { find } from "./tree.js";
-export { creatureInk } from "./glyphs.js";
+export { creatureInk, speciesChar } from "./glyphs.js";
 
 /** Chrome text size and the height of one text row, px. */
-export const FS = 16;
+export const FS = 15;
 export const CH = 18;
 
 /** The cell a glyph is drawn in, px: the tileset's (tileset.js, written by art/slice_tileset.py). */
@@ -38,6 +38,8 @@ const RAIL_BELOW = 160;
 const WIDTH_KEY = "df.sidebar.width";
 // address -> color name: the color each live agent was given, so it keeps it.
 const COLORS_KEY = "df.agent.colors";
+// address -> "first" or a race name: the race each live agent was given, so it keeps it.
+const RACES_KEY = "df.agent.races";
 
 const ANSI = { BLACK: 0, RED: 1, GREEN: 2, BROWN: 3, BLUE: 4, MAGENTA: 5, CYAN: 6, LGRAY: 7, DGRAY: 8, LRED: 9, LGREEN: 10, YELLOW: 11, LBLUE: 12, LMAGENTA: 13, LCYAN: 14, WHITE: 15 };
 
@@ -159,12 +161,15 @@ export const isRoleHidden = (role) => hiddenIn(layout(), role);
  * as the agent lives.
  */
 export function agentGlyphs(c) {
-  const stored = shared(COLORS_KEY);
-  const kept = stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {};
+  const stored = (key) => {
+    const value = shared(key);
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  };
   const list = agents();
-  const assigned = assignGlyphs(list.map((a) => ({ address: a.address, key: a.program?.key })), kept);
+  const assigned = assignGlyphs(list.map((a) => ({ address: a.address, key: a.program?.key, space: a.space })), stored(COLORS_KEY), stored(RACES_KEY));
   // Every copy works this out from the same inputs, so they all write the same thing.
   // With no agents (starting up, a core that is reconnecting) nothing is forgotten: they may be back.
   if (assigned.changed && list.length > 0) setShared(COLORS_KEY, assigned.kept);
+  if (assigned.racesChanged && list.length > 0) setShared(RACES_KEY, assigned.races);
   return new Map([...assigned.glyphs].map(([address, glyph]) => [address, { char: glyph.char, color: c[glyph.color], dark: c[glyph.dark] }]));
 }

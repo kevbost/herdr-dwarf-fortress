@@ -1,9 +1,11 @@
 #!/bin/sh
-# Copy the live layout, theme and mod from your Herdr home into this repo, then
-# test the copy and refuse if it looks private. The Herdr home is where you edit
-# (hot reload shows changes at once); this repo is what you publish.
+# Pull the live layout, theme and mod from your Herdr home into this repo, then
+# test the copy and refuse if it looks private. The repo is the source and
+# scripts/deploy-to-herdr.mjs copies it into the home as you work; use this only to
+# bring in a change the app made itself (the "Menu to the right/left" row rewrites
+# the layout file), because it overwrites the repo copy.
 #
-#   scripts/sync-from-herdr.sh          sync, test, scan
+#   scripts/sync-from-herdr.sh          pull, test, scan
 #   scripts/sync-from-herdr.sh check    show what differs, change nothing
 #
 # HERDR_APP_HOME picks another home (default ~/.config/herdr-app).
@@ -11,7 +13,8 @@ set -eu
 NAME=df-classic
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 LIVE="${HERDR_APP_HOME:-$HOME/.config/herdr-app}"
-EXCLUDES="--exclude=.DS_Store --exclude=jsconfig.json --exclude=gpui-kit.d.ts --exclude=*.error"
+# RECIPE.md and the previews are the repo's (the home may hold old copies); the root copies come from sync-gallery-copies.sh.
+EXCLUDES="--exclude=.DS_Store --exclude=jsconfig.json --exclude=gpui-kit.d.ts --exclude=*.error --exclude=*.deploy-tmp --exclude=RECIPE.md --exclude=preview*.png"
 
 for f in "$LIVE/layouts/$NAME.json" "$LIVE/themes/$NAME.json" "$LIVE/mods/$NAME/main.js"; do
   [ -e "$f" ] || { echo "missing $f: is $LIVE the right Herdr home?" >&2; exit 1; }
@@ -19,13 +22,19 @@ done
 
 if [ "${1:-}" = "check" ]; then
   echo "differences (live -> repo), nothing changed:"
-  rsync -ani --delete $EXCLUDES "$LIVE/mods/$NAME/" "$REPO/mods/$NAME/" | sed 's/^/  mod: /'
+  # content, not times: a deploy gives the home copy new modification times, and rsync
+  # lists those as "." lines (nothing would be updated)
+  rsync -rlpcni --delete $EXCLUDES "$LIVE/mods/$NAME/" "$REPO/mods/$NAME/" | grep -v '^\.' | sed 's/^/  mod: /'
   for pair in "layouts/$NAME.json" "layouts/$NAME.png" "themes/$NAME.json"; do
     cmp -s "$LIVE/$pair" "$REPO/$pair" || echo "  differs: $pair"
   done
-  cmp -s "$LIVE/mods/$NAME/RECIPE.md" "$REPO/RECIPE.md" || echo "  differs: RECIPE.md (repo root)"
-  cmp -s "$LIVE/mods/$NAME/preview.png" "$REPO/preview.png" || echo "  differs: preview.png (repo root)"
   exit 0
+fi
+
+# A pull overwrites the repo copy: refuse over uncommitted work.
+if git -C "$REPO" rev-parse --git-dir >/dev/null 2>&1 && [ -n "$(git -C "$REPO" status --porcelain -- layouts themes mods RECIPE.md preview.png)" ]; then
+  echo "uncommitted changes in layouts/, themes/, mods/ or the root RECIPE.md and preview.png: commit or stash them first, a pull would overwrite them" >&2
+  exit 1
 fi
 
 mkdir -p "$REPO/layouts" "$REPO/themes" "$REPO/mods"
@@ -33,25 +42,15 @@ cp "$LIVE/layouts/$NAME.json" "$REPO/layouts/"
 [ -e "$LIVE/layouts/$NAME.png" ] && cp "$LIVE/layouts/$NAME.png" "$REPO/layouts/"
 cp "$LIVE/themes/$NAME.json" "$REPO/themes/"
 rsync -a --delete $EXCLUDES "$LIVE/mods/$NAME/" "$REPO/mods/$NAME/"
-# The gallery (herdr.dev) wants RECIPE.md and preview.png beside layouts/ and mods/: the repo root.
-cp "$LIVE/mods/$NAME/RECIPE.md" "$REPO/RECIPE.md"
-cp "$LIVE/mods/$NAME/preview.png" "$REPO/preview.png"
 echo "synced from $LIVE"
+node "$REPO/scripts/deploy-to-herdr.mjs" baseline
+"$REPO/scripts/sync-gallery-copies.sh"
 
 echo "tests:"
 ( cd "$REPO/mods/$NAME" && node --test ".tests/*.test.mjs" 2>&1 | grep -E "^# (pass|fail)|^ℹ (pass|fail)" )
 
 echo "privacy scan:"
-bad=0
-scan() { # pattern, label
-  if grep -rIlE "$1" "$REPO" --exclude-dir=.git --exclude=sync-from-herdr.sh --exclude=.private-words >/tmp/herdr-sync-hits 2>/dev/null; then
-    echo "  FOUND $2 in:"; sed 's/^/    /' /tmp/herdr-sync-hits; bad=1
-  fi
-}
-scan "$(printf '%s' "$HOME" | sed 's/[.[\*^$/]/\\&/g')" "your home path"
-scan "[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com|net|org|io|dev)" "an email address"
-if [ -f "$REPO/scripts/.private-words" ]; then
-  while IFS= read -r w; do [ -n "$w" ] && scan "$w" "\"$w\""; done < "$REPO/scripts/.private-words"
-fi
-rm -f /tmp/herdr-sync-hits
-[ "$bad" = 0 ] && echo "  clean" || { echo "fix the above before committing" >&2; exit 1; }
+"$REPO/scripts/scan-private.sh"
+
+echo "references scan:"
+"$REPO/scripts/scan-references.sh"

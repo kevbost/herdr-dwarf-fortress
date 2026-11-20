@@ -7,3 +7,11 @@ gpui-kit.d.ts
 scripts/.private-words
 mods/df-classic/art/.wiki-cache/
 __pycache__/
+
+# deploy-to-herdr.mjs keeps what the last deploy left here
+.deploy-state/
+# project names scan-references.sh refuses in guidance files, one per line (yours, not for the repo)
+scripts/.community-names
+
+# editor settings, personal
+.vscode/
