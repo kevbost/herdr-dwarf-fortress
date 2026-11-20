@@ -1,0 +1,9 @@
+.DS_Store
+# Herdr rewrites these into every mod folder on start
+jsconfig.json
+gpui-kit.d.ts
+*.error
+# words sync-from-herdr.sh refuses to publish, one per line (yours, not for the repo)
+scripts/.private-words
+mods/df-classic/art/.wiki-cache/
+__pycache__/

@@ -1,0 +1,299 @@
+{
+  "id": "root",
+  "cloned_from": {
+    "name": "main",
+    "version": "0.1.16"
+  },
+  "type": "row",
+  "titlebar": "none",
+  "traffic_lights": [
+    8,
+    3
+  ],
+  "theme": "df-classic",
+  "ui_font": "PxPlus IBM VGA 9x16",
+  "background": "canvas",
+  "terminal_padding": [
+    8,
+    9
+  ],
+  "children": [
+    {
+      "id": "reports",
+      "type": "block",
+      "size": {
+        "px": 9
+      },
+      "content": {
+        "mod": "df-classic",
+        "props": {
+          "role": "reports"
+        }
+      }
+    },
+    {
+      "id": "shell",
+      "type": "column",
+      "children": [
+        {
+          "id": "top",
+          "type": "block",
+          "size": {
+            "px": 18
+          },
+          "window_drag": true,
+          "content": {
+            "mod": "df-classic",
+            "props": {
+              "role": "top"
+            }
+          }
+        },
+        {
+          "id": "body",
+          "type": "row",
+          "divider": {
+            "width": 8,
+            "color": "canvas"
+          },
+          "children": [
+            {
+              "id": "sidebar",
+              "type": "column",
+              "size": {
+                "px": 324
+              },
+              "min": 44,
+              "max": 480,
+              "background": "chrome",
+              "resizable": true,
+              "divider": {
+                "width": 8,
+                "color": "canvas"
+              },
+              "children": [
+                {
+                  "id": "map",
+                  "type": "block",
+                  "size": {
+                    "px": 224
+                  },
+                  "content": {
+                    "mod": "df-classic",
+                    "props": {
+                      "role": "map"
+                    }
+                  },
+                  "min": 96,
+                  "max": 640
+                },
+                {
+                  "id": "sidebar-lists",
+                  "type": "column",
+                  "divider": {
+                    "width": 8,
+                    "color": "canvas"
+                  },
+                  "children": [
+                    {
+                      "id": "spaces",
+                      "type": "block",
+                      "size": {
+                        "weight": 1
+                      },
+                      "min": 90,
+                      "content": {
+                        "mod": "df-classic",
+                        "props": {
+                          "role": "spaces"
+                        }
+                      }
+                    },
+                    {
+                      "id": "agents",
+                      "type": "block",
+                      "size": {
+                        "weight": 1
+                      },
+                      "min": 90,
+                      "content": {
+                        "mod": "df-classic",
+                        "props": {
+                          "role": "agents"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "sidebar-footer",
+                  "type": "block",
+                  "size": {
+                    "px": 126
+                  },
+                  "content": {
+                    "mod": "df-classic",
+                    "props": {
+                      "role": "footer"
+                    }
+                  },
+                  "min": 126,
+                  "max": 126
+                }
+              ]
+            },
+            {
+              "id": "work",
+              "type": "column",
+              "resizable": false,
+              "divider": {
+                "width": 8,
+                "color": "canvas"
+              },
+              "children": [
+                {
+                  "id": "tabs",
+                  "type": "block",
+                  "size": {
+                    "px": 18
+                  },
+                  "content": {
+                    "mod": "df-classic",
+                    "props": {
+                      "role": "tabs"
+                    }
+                  }
+                },
+                {
+                  "id": "work-body",
+                  "type": "row",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "id": "main",
+                      "type": "block",
+                      "content": {
+                        "tab": "active",
+                        "pane": {
+                          "gap": 8,
+                          "radius": 0,
+                          "background": "background",
+                          "lone": true,
+                          "border": {
+                            "width": 1,
+                            "color": "background"
+                          },
+                          "focus": {
+                            "width": 1,
+                            "color": "accent"
+                          },
+                          "header": {
+                            "content": {
+                              "mod": "df-classic",
+                              "props": {
+                                "role": "pane"
+                              }
+                            },
+                            "height": 18,
+                            "position": "top",
+                            "reveal": "always"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "panel",
+                      "type": "column",
+                      "hidden": true,
+                      "size": {
+                        "px": 368
+                      },
+                      "min": 280,
+                      "max": 900,
+                      "children": [
+                        {
+                          "id": "panel-body",
+                          "type": "stack",
+                          "active": "files",
+                          "children": [
+                            {
+                              "id": "files",
+                              "type": "block",
+                              "content": {
+                                "mod": "files"
+                              }
+                            },
+                            {
+                              "id": "changes",
+                              "type": "block",
+                              "content": {
+                                "mod": "changes"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "status",
+                  "type": "block",
+                  "size": {
+                    "px": 18
+                  },
+                  "content": {
+                    "mod": "df-classic",
+                    "props": {
+                      "role": "status"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "depth",
+              "type": "block",
+              "size": {
+                "px": 9
+              },
+              "content": {
+                "mod": "df-classic",
+                "props": {
+                  "role": "depth"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "bottom",
+          "type": "block",
+          "size": {
+            "px": 8
+          },
+          "content": {
+            "mod": "df-classic",
+            "props": {
+              "role": "border"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "frame-right",
+      "type": "block",
+      "size": {
+        "px": 9
+      },
+      "content": {
+        "mod": "df-classic",
+        "props": {
+          "role": "border"
+        }
+      }
+    }
+  ],
+  "preview": "layouts/df-classic.png"
+}
