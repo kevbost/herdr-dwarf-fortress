@@ -23,6 +23,8 @@ if [ "${1:-}" = "check" ]; then
   for pair in "layouts/$NAME.json" "layouts/$NAME.png" "themes/$NAME.json"; do
     cmp -s "$LIVE/$pair" "$REPO/$pair" || echo "  differs: $pair"
   done
+  cmp -s "$LIVE/mods/$NAME/RECIPE.md" "$REPO/RECIPE.md" || echo "  differs: RECIPE.md (repo root)"
+  cmp -s "$LIVE/mods/$NAME/preview.png" "$REPO/preview.png" || echo "  differs: preview.png (repo root)"
   exit 0
 fi
 
@@ -31,6 +33,9 @@ cp "$LIVE/layouts/$NAME.json" "$REPO/layouts/"
 [ -e "$LIVE/layouts/$NAME.png" ] && cp "$LIVE/layouts/$NAME.png" "$REPO/layouts/"
 cp "$LIVE/themes/$NAME.json" "$REPO/themes/"
 rsync -a --delete $EXCLUDES "$LIVE/mods/$NAME/" "$REPO/mods/$NAME/"
+# The gallery (herdr.dev) wants RECIPE.md and preview.png beside layouts/ and mods/: the repo root.
+cp "$LIVE/mods/$NAME/RECIPE.md" "$REPO/RECIPE.md"
+cp "$LIVE/mods/$NAME/preview.png" "$REPO/preview.png"
 echo "synced from $LIVE"
 
 echo "tests:"

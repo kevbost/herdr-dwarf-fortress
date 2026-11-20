@@ -9,7 +9,7 @@ Most layout repos do the reverse: the repo is the source and a script copies it 
 Herdr only reads its own home (`~/.config/herdr-app`). This repo is a snapshot for publishing, not something Herdr runs.
 
 - **Edit in the Herdr home**, in `layouts/df-classic.json`, `themes/df-classic.json` and `mods/df-classic/`. Saving a file reloads the mod at once, so you see changes live.
-- **Sync into the repo before you commit:**
+- **Sync into the repo before you commit.** It also copies `RECIPE.md` and `preview.png` to the repo root, where herdr.dev's gallery looks for them beside `layouts/` and `mods/`:
   ```sh
   scripts/sync-from-herdr.sh         # copy, run the tests, scan for private strings
   scripts/sync-from-herdr.sh check   # only show what differs
